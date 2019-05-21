@@ -1,33 +1,54 @@
-.App {
+
+.connected{
+  top:-19px !important;
+  background-color: #34c534;
+}
+.disconnected {
+  background-color: red;
+}
+.connecting{
+  background-color: #ff9b00;
+}
+
+.connectionBar{
+  position: fixed;
+  width:100%;
+  top:0px;
+  color:white;
+  font-weight: bold;  
   text-align: center;
 }
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
-  pointer-events: none;
+.messageContainer{
+  padding-bottom:1px;
+}
+.message
+{
+  padding-top:4px;
+  padding-bottom:4px;
+  padding-left:20px;
+  padding-right:20px;
+  word-wrap: break-word;
+  border-radius:5px;
+  margin-top:3px;
+  font-size: 16px;
+  font-family: arial;
+  background-color: 'grey';
+}
+.inputBox{
+  position: fixed;
+  bottom: 10px;
+  left: 0px;
+  right: 0px;
+  padding-left: 30px;
+  padding-right: 30px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.padding10{
+  padding-top:15px;
+  padding-left:30px;
+  padding-right:30px;
+  padding-bottom:60px;
 }
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.typingUsers{
+  background:white;
 }
