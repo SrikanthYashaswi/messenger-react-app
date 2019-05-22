@@ -9,23 +9,67 @@ const STATE = {
 }
 
 export class AppStore extends React.Component {
+    
     constructor() {
         super();
+        this.username = '';
+        this.audio = new Audio("https://notificationsounds.com/soundfiles/8eefcfdf5990e441f0fb6f3fad709e21/file-sounds-1100-open-ended.ogg");
+        this.queryParams = {};
+        window.onfocus = this.onFocus.bind(this)
         this.state = {
             messages: [],
             connection: STATE.CONNECTING,
             onlineUsers: '',
-            userName: '',
             typingUsers: {},
             scrollHeight:0,
+            messageCountWhenAway : 0
         }
+        
+        this.readUrlQueryParams();
         this.serverSocket = null;
         this.initializeWebSocket();
         this.startAsyncServices();
         this.recovering = false;
+        
     }
 
-    initializeWebSocket() {
+    readUrlQueryParams()
+    {
+        var q = {};
+		var url = window.location.href;
+		var pattern = /\?(.*)/
+		var patternResult = pattern.exec(url);
+		if(patternResult != null)
+		{
+		    var queriesList = patternResult[1].split('&');
+		    for(var i = 0 ; i < queriesList.length; i++)
+		    {
+                var param = queriesList[i].split('=');
+	    		q[param[0]] = param[1];
+    		}
+        }
+        this.username = q['n'] === undefined ? '' : q['n'];
+        this.queryParams = q;
+    }
+
+    onFocus()
+    {
+        document.title = 'FrizBee';
+        this.setState({messageCountWhenAway: 0});
+    }
+
+    updateMessageCountOnBlur()
+    {
+        if(!document.hasFocus())
+        {
+            let {messageCountWhenAway} = this.state;
+            this.audio.play();
+            this.setState({messageCountWhenAway: messageCountWhenAway+1});
+        }
+    }
+
+    initializeWebSocket() 
+    {
         if(this.serverSocket !== null && this.serverSocket.readyState === WebSocket.CONNECTING)
         {
             return;
@@ -46,15 +90,7 @@ export class AppStore extends React.Component {
     }
 
     onWebsocketMessage(evt) {
-        if(this.recovering)
-        {
-            this.sendMessage(this.state.userName);
-            this.recovering = false;
-        }
-        else
-        {
-            this.resolveMessage(evt.data);
-        }
+        this.resolveMessage(evt.data);
     }
 
     handleError() {
@@ -72,7 +108,7 @@ export class AppStore extends React.Component {
         }
         else if (message.indexOf('@typing') === 0) {
             this.updateTypingUsers(message);
-            return;
+            return; 
         }
         else {
             this.updateNewMessage(message);
@@ -107,7 +143,7 @@ export class AppStore extends React.Component {
             sender: '@self',
             raw: message,
             time: moment().format('LLL')
-        }
+        }   
     }
 
     updateNewMessage(message) {
@@ -116,6 +152,8 @@ export class AppStore extends React.Component {
 
         const user = message.split(':')[0].trim();
         delete typingUsers[user];
+
+        this.updateMessageCountOnBlur();
         this.setState({ messages: messages, typingUsers: typingUsers , scrollHeight: messages.length * 130});        
     }
 
@@ -124,43 +162,47 @@ export class AppStore extends React.Component {
         {
             return;
         }
-        if (this.state.userName === '') {
-            this.serverSocket.send(message);
-            this.setState({ userName: message });
-        }
-        else {
-            let { messages } = this.state;
+        
+        let { messages } = this.state;
+
+        if (this.username === '') {
+            this.setUsername(message);
             messages.push(this.parseOutgoingMessage(message));
             this.serverSocket.send(message);
-            this.setState({ messages: messages , scrollHeight: messages.length * 130});
         }
+        else {
+            messages.push(this.parseOutgoingMessage(message));
+            this.serverSocket.send(message);
+        }
+        this.setState({ messages: messages , scrollHeight: messages.length * 130});
+    }
+
+    setUsername(name)
+    {
+        this.queryParams['n'] = name;
+        this.username = name;
     }
 
     updateTyping() {
-        let { userName } = this.state;
-        if (userName !== "") {
-            this.serverSocket.send('@typing:' + userName);
+        if (this.username !== "") {
+            this.serverSocket.send('@typing:' + this.username);
         }
     }
 
     formWsUrl() {
-        var group = this.getGroupName();
-        return (window.location.hostname === 'localhost') ? "ws://localhost:8080" + group : "wss://events.newgen.co/im" + group;
+        var queryParams = this.getQueryString();
+        return (window.location.hostname === 'localhost') ? "ws://localhost:8080" + queryParams : "wss://events.newgen.co/im" + queryParams;
     }
-
-    getGroupName() {
-        var q = {};
-        var url = window.location.href;
-        var pattern = /\?(.*)/
-        var patternResult = pattern.exec(url);
-        if (patternResult != null) {
-            var queriesList = patternResult[1].split('&');
-            for (var i = 0; i < queriesList.length; i++) {
-                var param = queriesList[i].split('=');
-                q[param[0]] = param[1];
-            }
+    
+    getQueryString() {
+        var str = '?';
+        const keys = Object.keys(this.queryParams);
+        for(var i in keys)
+        {
+            var key = keys[i];
+            str+= key+"="+this.queryParams[key]+"&";
         }
-        return q['g'] === undefined ? '' : '?g=' + q['g'];
+        return str.substring(0, str.length - 1);
     }
 
     getTime() {
@@ -208,7 +250,15 @@ export class AppStore extends React.Component {
         }
     }
 
+    renderTitle()
+    {
+        let {messageCountWhenAway,messages} = this.state;
+        var msg = messageCountWhenAway > 0 ? messages[messages.length - 1 ].sender+' says..' : 'Frizbee'; 
+        document.title =  msg;
+    }
+
     render() {
+        this.renderTitle()
         return (
             <div>
                 <AppContainer appStore={this.state} api={this.getApiHooks()} />
