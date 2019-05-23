@@ -1,5 +1,5 @@
+import { Icon } from 'antd';
 import React from 'react';
-
 export class TypingUsers extends React.Component
 {
     render()
@@ -8,7 +8,8 @@ export class TypingUsers extends React.Component
         let users = Object.keys(appStore.typingUsers);
         return(
             <div className="typingUsers">
-                <span>{users.length > 0 && users.join(',')+" typing..."}</span>
+                {users.length > 0 && <Icon type="edit" style={{marginRight:'5px'}}/>}
+                <span >{users.length > 0 && users.join(',')}</span>
             </div>
         )
     }

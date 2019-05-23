@@ -1,0 +1,6 @@
+cd ../imthug.github.io 
+rm -rf * 
+cp -r ../messenger/build/* . 
+git add . 
+git commit -m "build" 
+git push 

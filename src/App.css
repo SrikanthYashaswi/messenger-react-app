@@ -51,4 +51,5 @@
 }
 .typingUsers{
   background:white;
+  display: 'flex'
 }

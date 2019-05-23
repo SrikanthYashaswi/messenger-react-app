@@ -191,7 +191,7 @@ export class AppStore extends React.Component {
 
     formWsUrl() {
         var queryParams = this.getQueryString();
-        return (window.location.hostname === 'localhost') ? "ws://localhost:8080" + queryParams : "wss://events.newgen.co/im" + queryParams;
+        return (window.location.hostname === 'localhost') ? "ws://localhost:8080" + queryParams : "wss://events.newgen.co/im/" + queryParams;
     }
     
     getQueryString() {
