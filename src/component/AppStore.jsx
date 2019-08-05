@@ -1,6 +1,6 @@
+import moment from 'moment';
 import React from 'react';
 import { AppContainer } from './AppContainer.jsx';
-import moment from 'moment';
 
 const STATE = {
     CONNECTED: 'connected',
@@ -22,34 +22,15 @@ export class AppStore extends React.Component {
             onlineUsers: '',
             typingUsers: {},
             scrollHeight:0,
-            messageCountWhenAway : 0
+            messageCountWhenAway : 0,
+            latency:null,
+            nerdLog:null,
         }
-        
-        this.readUrlQueryParams();
+        this.average = 1;
         this.serverSocket = null;
         this.initializeWebSocket();
         this.startAsyncServices();
         this.recovering = false;
-        
-    }
-
-    readUrlQueryParams()
-    {
-        var q = {};
-		var url = window.location.href;
-		var pattern = /\?(.*)/
-		var patternResult = pattern.exec(url);
-		if(patternResult != null)
-		{
-		    var queriesList = patternResult[1].split('&');
-		    for(var i = 0 ; i < queriesList.length; i++)
-		    {
-                var param = queriesList[i].split('=');
-	    		q[param[0]] = param[1];
-    		}
-        }
-        this.username = q['n'] === undefined ? '' : q['n'];
-        this.queryParams = q;
     }
 
     onFocus()
@@ -110,9 +91,28 @@ export class AppStore extends React.Component {
             this.updateTypingUsers(message);
             return; 
         }
+        else if (message.indexOf('@pong') === 0){
+            this.updateLatency(message);
+            return;
+        }
+        else if(message.indexOf('@logs') === 0){
+            this.updateNerdLog(message);
+        }
         else {
             this.updateNewMessage(message);
         }
+    }
+
+    updateNerdLog(message){
+        var log = message.split(":")[1];
+        var js = JSON.parse(log);
+        this.setState({nerdLog: js});
+    }
+
+    updateLatency(message){
+        var time = parseInt(message.split(":")[1]);
+        var latency = moment().valueOf() - time;
+        this.setState({latency: Math.ceil((this.state.latency + latency )/2) });
     }
 
     updateOnlineUsers(message) {
@@ -165,44 +165,18 @@ export class AppStore extends React.Component {
         
         let { messages } = this.state;
 
-        if (this.username === '') {
-            this.setUsername(message);
-            messages.push(this.parseOutgoingMessage(message));
-            this.serverSocket.send(message);
-        }
-        else {
-            messages.push(this.parseOutgoingMessage(message));
-            this.serverSocket.send(message);
-        }
+        messages.push(this.parseOutgoingMessage(message));
+        this.serverSocket.send(message);
         this.setState({ messages: messages , scrollHeight: messages.length * 130});
     }
 
-    setUsername(name)
-    {
-        this.queryParams['n'] = name;
-        this.username = name;
-    }
-
     updateTyping() {
-        if (this.username !== "") {
-            this.serverSocket.send('@typing:' + this.username);
-        }
+        if(this.state.connection === STATE.CONNECTED)
+        this.serverSocket.send('@typing');
     }
 
     formWsUrl() {
-        var queryParams = this.getQueryString();
-        return (window.location.hostname === 'localhost') ? "ws://localhost:8080" + queryParams : "wss://events.newgen.co/im/" + queryParams;
-    }
-    
-    getQueryString() {
-        var str = '?';
-        const keys = Object.keys(this.queryParams);
-        for(var i in keys)
-        {
-            var key = keys[i];
-            str+= key+"="+this.queryParams[key]+"&";
-        }
-        return str.substring(0, str.length - 1);
+        return (window.location.hostname === 'localhost') ? "ws://localhost:8080" : "wss://events.newgen.co/im/" ;
     }
 
     getTime() {
@@ -218,7 +192,7 @@ export class AppStore extends React.Component {
 
     startAsyncServices() {
         this.typingUserService = setInterval(this.refreshTypingUsers.bind(this), 300);
-        this.connectionMonitorService = setInterval(this.monitorConnection.bind(this), 5000);
+        this.connectionMonitorService = setInterval(this.monitorConnection.bind(this), 2000);
     }
 
     refreshTypingUsers() {
@@ -238,7 +212,7 @@ export class AppStore extends React.Component {
 
     monitorConnection() {
         let {connection} = this.state;
-        
+        let time = moment().valueOf();
         if(connection === STATE.DISCONNECTED)
         {
             this.initializeWebSocket();
@@ -246,7 +220,7 @@ export class AppStore extends React.Component {
 
         if(connection === STATE.CONNECTED)
         {
-            this.serverSocket.send('@pong');
+            this.serverSocket.send('@ping:' + time);
         }
     }
 
