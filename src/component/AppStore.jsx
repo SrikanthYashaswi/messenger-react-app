@@ -112,7 +112,7 @@ export class AppStore extends React.Component {
     updateLatency(message){
         var time = parseInt(message.split(":")[1]);
         var latency = moment().valueOf() - time;
-        this.setState({latency: Math.ceil((this.state.latency + latency )/2) });
+        this.setState({latency: latency });
     }
 
     updateOnlineUsers(message) {
