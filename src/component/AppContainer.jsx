@@ -4,7 +4,7 @@ import { ConnectionBulb } from './ConnectionBulb.jsx';
 import { InputBox } from './InputBox.jsx';
 import { MessageContainer } from './MessageContainer.jsx';
 import { NerdStat } from './NerdStat.jsx';
-
+import {CanvasContainer} from './CanvasContainer.jsx'
 
 export class AppContainer extends React.Component
 {
@@ -25,7 +25,7 @@ export class AppContainer extends React.Component
                     </Col>
 
                     <Col span={12}>
-                        asdasdasd
+                        <CanvasContainer api={api}/>
                     </Col>
 
                 </Row>

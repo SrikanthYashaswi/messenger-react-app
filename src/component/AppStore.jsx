@@ -1,6 +1,7 @@
 import moment from 'moment';
 import React from 'react';
 import { AppContainer } from './AppContainer.jsx';
+import PubSub from 'pubsub-js'
 
 const STATE = {
     CONNECTED: 'connected',
@@ -98,6 +99,9 @@ export class AppStore extends React.Component {
         else if(message.indexOf('@logs') === 0){
             this.updateNerdLog(message);
         }
+        else if(message.indexOf('@canvas') === 0){
+            this.publishToCanvas(message);
+        }
         else {
             this.updateNewMessage(message);
         }
@@ -170,6 +174,14 @@ export class AppStore extends React.Component {
         this.setState({ messages: messages , scrollHeight: messages.length * 130});
     }
 
+    publishToCanvas(message){
+        PubSub.publish('canvas', message);
+    }
+
+    sendCanvasMessage(message){
+        this.serverSocket.send(message);
+    }
+
     updateTyping() {
         if(this.state.connection === STATE.CONNECTED)
         this.serverSocket.send('@typing');
@@ -186,7 +198,8 @@ export class AppStore extends React.Component {
     getApiHooks() {
         return {
             sendMessage: this.sendMessage.bind(this),
-            updateTyping: this.updateTyping.bind(this)
+            updateTyping: this.updateTyping.bind(this),
+            sendCanvasMessage: this.sendCanvasMessage.bind(this)
         }
     }
 
