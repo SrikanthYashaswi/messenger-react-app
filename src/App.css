@@ -35,8 +35,8 @@
   background-color: 'grey';
 }
 .inputBox{
-  position: fixed;
-  bottom: 10px;
+  position: absolute;
+  bottom: -65px;
   left: 0px;
   right: 0px;
   padding-left: 30px;
@@ -47,7 +47,6 @@
   padding-top:15px;
   padding-left:30px;
   padding-right:30px;
-  padding-bottom:60px;
 }
 .typingUsers{
   background:white;

@@ -1,4 +1,4 @@
-import { Input , Button} from 'antd';
+import { Button, Input } from 'antd';
 import React from 'react';
 import { TypingUsers } from './TypingUsers';
 
