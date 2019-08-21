@@ -10,7 +10,6 @@ export class AppContainer extends React.Component
 {
     render()
     {
-        const { Content } = Layout;
         let {appStore, api} = this.props;
         return(
             <div className="padding10">
