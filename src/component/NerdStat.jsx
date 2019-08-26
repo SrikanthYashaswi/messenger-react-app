@@ -1,7 +1,9 @@
 import React from 'react';
 
 const index ={
-    ONLINE_USERS: 0
+    ONLINE_USERS: 0,
+    LOOP_TIME:1,
+    USED_MEM:2
 }
 
 export class NerdStat extends React.Component{
@@ -22,6 +24,10 @@ export class NerdStat extends React.Component{
             return (
                 <div>
                     users: {nerdLog[index.ONLINE_USERS]}
+                    <br/>
+                    loop Time: {parseInt(nerdLog[index.LOOP_TIME])/1000000}
+                    <br/>
+                    Mem Usage: {parseInt(nerdLog[index.USED_MEM]) } KB
                 </div>
             )
         }
