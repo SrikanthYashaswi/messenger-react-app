@@ -1,5 +1,7 @@
-import {  List, Skeleton, Tag } from 'antd';
+import {  List, Skeleton, Typography } from 'antd';
 import React from 'react';
+
+const { Paragraph } = Typography;
 
 export class MessageContainer extends React.Component
 {
@@ -7,10 +9,22 @@ export class MessageContainer extends React.Component
     {
         super();
         this.mounted  = false;
+        this.scrollToBottom();
     }
     componentDidMount()
     {
         this.mounted = true;
+    }
+
+    componentDidUpdate() {
+        this.scrollToBottom();
+    }
+
+    scrollToBottom() {
+        if(this.el !== undefined){
+            this.el.current.scrollIntoView({ behavior: 'smooth' });
+            console.log("heooo");
+        }
     }
     parseSkeleton()
     {
@@ -38,9 +52,9 @@ export class MessageContainer extends React.Component
                     {
                         item.sender.trim() === '@self' 
                         ?
-                        <Tag  color="geekblue"><div style={{wordBreak: 'break-word' }}>{item.raw}</div></Tag>
+                        <pre style={{wordBreak: 'break-word',whiteSpace: 'pre-wrap' }}>{item.raw}</pre>
                         :
-                        <Tag color="blue">{item.raw}</Tag>
+                        <pre style={{wordBreak: 'break-word',whiteSpace: 'pre-wrap' }}>{item.raw}</pre>
                     }
                     
                 </List.Item>

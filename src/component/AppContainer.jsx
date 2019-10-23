@@ -8,25 +8,44 @@ import {CanvasContainer} from './CanvasContainer.jsx'
 
 export class AppContainer extends React.Component
 {
-    render()
+    messageContiner()
     {
         let {appStore, api} = this.props;
         return(
+            <div style={{height: '86vh',overflow: 'scroll'}}>
+                <NerdStat  appStore={appStore}/>
+                <ConnectionBulb appStore={appStore}/>
+                <MessageContainer appStore={appStore} />
+                <InputBox api={api} appStore={appStore} />
+            </div>
+        )
+    }
+
+    leftContainer()
+    {
+        return(
+            <Col span={12}>
+                {this.messageContiner()}
+            </Col>
+        )
+    }
+
+    rightContainer()
+    {
+        let {appStore, api} = this.props;
+        return(
+            <Col span={12}>
+                <CanvasContainer api={api}/>
+            </Col>
+        )
+    }
+
+    render()
+    {
+        return(
             <div className="padding10">
                 <Row>
-                    <Col span={12}>
-                        <div style={{height: '86vh',overflow: 'scroll'}}>
-                            <NerdStat  appStore={appStore}/>
-                            <ConnectionBulb appStore={appStore}/>
-                            <MessageContainer appStore={appStore}/>
-                            <InputBox api={api} appStore={appStore} />
-                        </div>
-                    </Col>
-
-                    <Col span={12}>
-                        <CanvasContainer api={api}/>
-                    </Col>
-
+                    {this.messageContiner()}
                 </Row>
             </div>
         )

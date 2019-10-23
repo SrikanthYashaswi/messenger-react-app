@@ -45,7 +45,6 @@ export class AppStore extends React.Component {
         if(!document.hasFocus())
         {
             let {messageCountWhenAway} = this.state;
-            this.audio.play();
             this.setState({messageCountWhenAway: messageCountWhenAway+1});
         }
     }
@@ -170,7 +169,7 @@ export class AppStore extends React.Component {
         let { messages } = this.state;
 
         messages.push(this.parseOutgoingMessage(message));
-        this.serverSocket.send(message);
+        this.serverSocket.send(message+"\r\n");
         this.setState({ messages: messages , scrollHeight: messages.length * 130});
     }
 
@@ -184,7 +183,7 @@ export class AppStore extends React.Component {
 
     updateTyping() {
         if(this.state.connection === STATE.CONNECTED)
-        this.serverSocket.send('@typing');
+        this.serverSocket.send('@typing\r\n');
     }
 
     formWsUrl() {
@@ -205,7 +204,7 @@ export class AppStore extends React.Component {
 
     startAsyncServices() {
         this.typingUserService = setInterval(this.refreshTypingUsers.bind(this), 300);
-        this.connectionMonitorService = setInterval(this.monitorConnection.bind(this), 2000);
+        //this.connectionMonitorService = setInterval(this.monitorConnection.bind(this), 2000);
     }
 
     refreshTypingUsers() {
@@ -233,7 +232,7 @@ export class AppStore extends React.Component {
 
         if(connection === STATE.CONNECTED)
         {
-            this.serverSocket.send('@ping:' + time);
+            this.serverSocket.send('@ping:' + time+'\r\n');
         }
     }
 
